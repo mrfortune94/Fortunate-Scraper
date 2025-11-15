@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 const { chromium } = require('playwright');
 const archiver = require('archiver');
 const fs = require('fs');
@@ -13,11 +14,24 @@ const PORT = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
 
+// Rate limiters
+const scrapeLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Limit each IP to 10 scrape requests per windowMs
+  message: 'Too many scrape requests, please try again later.',
+});
+
+const downloadLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 50, // Limit each IP to 50 download requests per windowMs
+  message: 'Too many download requests, please try again later.',
+});
+
 // Store active scraping jobs
 const jobs = new Map();
 
 // Scrape endpoint
-app.post('/api/scrape', async (req, res) => {
+app.post('/api/scrape', scrapeLimiter, async (req, res) => {
   const { url, loginSelectors, proxyConfig } = req.body;
   
   if (!url) {
@@ -68,7 +82,7 @@ app.get('/api/jobs', (req, res) => {
 });
 
 // Download ZIP archive
-app.get('/api/download/:jobId', (req, res) => {
+app.get('/api/download/:jobId', downloadLimiter, (req, res) => {
   const { jobId } = req.params;
   const job = jobs.get(jobId);
 
