@@ -200,6 +200,7 @@ async function saveResources(page, outputDir, jobId) {
   });
 
   // Get all resource URLs
+  // eslint-disable-next-line no-undef
   const resources = await page.evaluate(() => {
     const urls = {
       css: [],
@@ -208,16 +209,19 @@ async function saveResources(page, outputDir, jobId) {
     };
 
     // CSS files
+    // eslint-disable-next-line no-undef
     document.querySelectorAll('link[rel="stylesheet"]').forEach(link => {
       urls.css.push(link.href);
     });
 
     // JS files
+    // eslint-disable-next-line no-undef
     document.querySelectorAll('script[src]').forEach(script => {
       urls.js.push(script.src);
     });
 
     // Images
+    // eslint-disable-next-line no-undef
     document.querySelectorAll('img[src]').forEach(img => {
       urls.images.push(img.src);
     });

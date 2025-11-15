@@ -17,26 +17,26 @@ function App() {
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    loadJobs()
-    const interval = setInterval(loadJobs, 2000)
-    return () => clearInterval(interval)
-  }, [])
-
-  const loadJobs = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/jobs`)
-      setJobs(response.data)
-      
-      if (selectedJob) {
-        const updated = response.data.find(j => j.id === selectedJob.id)
-        if (updated) {
-          setSelectedJob(updated)
+    const fetchJobs = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/jobs`)
+        setJobs(response.data)
+        
+        if (selectedJob) {
+          const updated = response.data.find(j => j.id === selectedJob.id)
+          if (updated) {
+            setSelectedJob(updated)
+          }
         }
+      } catch (error) {
+        console.error('Error loading jobs:', error)
       }
-    } catch (error) {
-      console.error('Error loading jobs:', error)
     }
-  }
+
+    fetchJobs()
+    const interval = setInterval(fetchJobs, 2000)
+    return () => clearInterval(interval)
+  }, [selectedJob])
 
   const handleScrape = async (e) => {
     e.preventDefault()
@@ -58,7 +58,7 @@ function App() {
       })
 
       alert(`Scraping started! Job ID: ${response.data.jobId}`)
-      await loadJobs()
+      // Jobs will be refreshed automatically by the useEffect interval
     } catch (error) {
       console.error('Error starting scrape:', error)
       alert('Error starting scrape: ' + error.message)
