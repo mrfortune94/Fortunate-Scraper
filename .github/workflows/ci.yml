@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Lint backend with ESLint
+        working-directory: ./backend
+        run: npm run lint
+
+      - name: Test Playwright install in backend
+        working-directory: ./backend
+        run: npx playwright --version
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: npm run build
+
+      - name: Docker Compose build (optional)
+        if: >-
+          ${{ github.event_name == 'push' ||
+              github.event.pull_request.draft == false }}
+        run: docker-compose build
+        continue-on-error: true
