@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+<<<<<<< HEAD
 const rateLimit = require('express-rate-limit');
 const { chromium } = require('playwright');
 const archiver = require('archiver');
@@ -7,12 +8,19 @@ const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 require('dotenv').config();
+=======
+const { v4: uuidv4 } = require('uuid');
+const path = require('path');
+const fs = require('fs');
+const scraper = require('./scraper');
+>>>>>>> f522e51b88c3ba5cdfa13403f987bd6894f5fab0
 
 const app = express();
 const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
+<<<<<<< HEAD
 
 // Rate limiters
 const scrapeLimiter = rateLimit({
@@ -33,12 +41,28 @@ const jobs = new Map();
 // Scrape endpoint
 app.post('/api/scrape', scrapeLimiter, async (req, res) => {
   const { url, loginSelectors, proxyConfig } = req.body;
+=======
+app.use('/downloads', express.static(path.join(__dirname, 'downloads')));
+
+// In-memory job storage
+const jobs = new Map();
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Initiate a new scrape job
+app.post('/api/scrape', async (req, res) => {
+  const { url, auth, proxy } = req.body;
+>>>>>>> f522e51b88c3ba5cdfa13403f987bd6894f5fab0
   
   if (!url) {
     return res.status(400).json({ error: 'URL is required' });
   }
 
   const jobId = uuidv4();
+<<<<<<< HEAD
   const outputDir = path.join(__dirname, 'output', jobId);
   
   // Create output directory
@@ -61,6 +85,24 @@ app.post('/api/scrape', scrapeLimiter, async (req, res) => {
   scrapeWebsite(jobId, url, loginSelectors, proxyConfig, outputDir);
 
   res.json({ jobId, message: 'Scraping job started' });
+=======
+  const job = {
+    id: jobId,
+    url,
+    status: 'queued',
+    progress: 0,
+    logs: [],
+    createdAt: new Date().toISOString(),
+    zipPath: null
+  };
+
+  jobs.set(jobId, job);
+
+  // Start scraping in the background
+  scraper.startScrape(jobId, url, auth, proxy, jobs);
+
+  res.json({ jobId, status: 'queued' });
+>>>>>>> f522e51b88c3ba5cdfa13403f987bd6894f5fab0
 });
 
 // Get job status
@@ -81,8 +123,13 @@ app.get('/api/jobs', (req, res) => {
   res.json(allJobs);
 });
 
+<<<<<<< HEAD
 // Download ZIP archive
 app.get('/api/download/:jobId', downloadLimiter, (req, res) => {
+=======
+// Download ZIP file
+app.get('/api/download/:jobId', (req, res) => {
+>>>>>>> f522e51b88c3ba5cdfa13403f987bd6894f5fab0
   const { jobId } = req.params;
   const job = jobs.get(jobId);
 
@@ -90,6 +137,7 @@ app.get('/api/download/:jobId', downloadLimiter, (req, res) => {
     return res.status(404).json({ error: 'Job not found' });
   }
 
+<<<<<<< HEAD
   if (job.status !== 'completed') {
     return res.status(400).json({ error: 'Job not completed yet' });
   }
@@ -295,4 +343,39 @@ function addLog(jobId, message) {
 app.listen(PORT, () => {
   console.log(`Fortunate-Scraper backend running on port ${PORT}`);
   console.log(`Proxy: ${process.env.PROXY_TARGET || 'Not configured'}`);
+=======
+  if (!job.zipPath || !fs.existsSync(job.zipPath)) {
+    return res.status(404).json({ error: 'ZIP file not found' });
+  }
+
+  res.download(job.zipPath, `scrape-${jobId}.zip`);
+});
+
+// Delete a job
+app.delete('/api/jobs/:jobId', (req, res) => {
+  const { jobId } = req.params;
+  const job = jobs.get(jobId);
+
+  if (!job) {
+    return res.status(404).json({ error: 'Job not found' });
+  }
+
+  // Delete the ZIP file if it exists
+  if (job.zipPath && fs.existsSync(job.zipPath)) {
+    fs.unlinkSync(job.zipPath);
+  }
+
+  jobs.delete(jobId);
+  res.json({ message: 'Job deleted successfully' });
+});
+
+app.listen(PORT, () => {
+  console.log(`Fortunate-Scraper backend running on port ${PORT}`);
+  
+  // Create downloads directory if it doesn't exist
+  const downloadsDir = path.join(__dirname, 'downloads');
+  if (!fs.existsSync(downloadsDir)) {
+    fs.mkdirSync(downloadsDir, { recursive: true });
+  }
+>>>>>>> f522e51b88c3ba5cdfa13403f987bd6894f5fab0
 });
