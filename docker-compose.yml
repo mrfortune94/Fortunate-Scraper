@@ -11,7 +11,9 @@ services:
       - PORT=8080
       - PROXY_TARGET=${PROXY_TARGET:-}
     volumes:
-      - ./backend/downloads:/app/downloads
+      - ./backend:/app
+      - /app/node_modules
+      - ./backend/output:/app/output
     restart: unless-stopped
 
   frontend:
@@ -20,11 +22,9 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5173:5173"
-    environment:
-      - VITE_API_URL=http://localhost:8080
     depends_on:
       - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     restart: unless-stopped
-
-volumes:
-  downloads:

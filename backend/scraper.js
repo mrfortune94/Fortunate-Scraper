@@ -233,7 +233,7 @@ async function downloadAsset(assetUrl, outputDir, baseUrl) {
 /**
  * Generate a safe filename from a URL
  */
-function generateFilename(url, baseUrl) {
+function generateFilename(url) {
   try {
     const urlObj = new URL(url);
     let pathname = urlObj.pathname;
