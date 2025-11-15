@@ -1,22 +1,14 @@
 {
   "name": "fortunate-scraper-frontend",
-<<<<<<< HEAD
-  "version": "1.0.0",
-  "description": "Frontend dashboard for Fortunate-Scraper",
-=======
   "private": true,
   "version": "1.0.0",
->>>>>>> f522e51b88c3ba5cdfa13403f987bd6894f5fab0
+  "description": "Frontend dashboard for Fortunate-Scraper",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-<<<<<<< HEAD
     "preview": "vite preview",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0"
-=======
-    "preview": "vite preview"
->>>>>>> f522e51b88c3ba5cdfa13403f987bd6894f5fab0
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -27,13 +19,10 @@
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",
-<<<<<<< HEAD
     "eslint": "^8.55.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-=======
->>>>>>> f522e51b88c3ba5cdfa13403f987bd6894f5fab0
     "vite": "^5.0.8"
   }
 }
